@@ -29,7 +29,7 @@ discriminator:
 training:
   train_zip: /content/drive/MyDrive/project2claude/train_50k_512.zip
   resolution: 512
-  batch_size: 32
+  batch_size: 16
   total_images: 300_000
   num_workers: 8
   flip: true
