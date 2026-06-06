@@ -183,7 +183,7 @@ def main() -> None:
                                     weights_only=False)["meta"]["training_config"]["g256_ckpt"])
     if g256_path is None:
         raise SystemExit("Provide --g256-ckpt (or --resume with embedded path).")
-    g_state = torch.load(g256_path, map_location=device, weights_only=True)
+    g_state = torch.load(g256_path, map_location=device, weights_only=False)
     G256.load_state_dict(g_state["G_ema_state"])
     for p in G256.parameters():
         p.requires_grad_(False)
