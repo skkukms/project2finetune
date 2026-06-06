@@ -195,8 +195,8 @@ def main() -> None:
     if args.phase == 2:
         r512_path = args.r512_ckpt
         if r512_path is None and args.resume:
-            r512_path = Path(torch.load(args.resume, map_location="cpu",
-                                        weights_only=False)["meta"]["training_config"]["r512_ckpt"])
+            _resume_meta = torch.load(args.resume, map_location="cpu", weights_only=False)
+            r512_path = Path(_resume_meta["meta"]["training_config"]["r512_ckpt"])
         if r512_path is None:
             raise SystemExit("Phase 2 requires --r512-ckpt.")
         r512_ckpt = torch.load(r512_path, map_location=device, weights_only=False)
@@ -247,7 +247,8 @@ def main() -> None:
         num_workers=train_cfg.get("num_workers", 4),
         pin_memory=(device == "cuda"),
         persistent_workers=(train_cfg.get("num_workers", 4) > 0),
-        prefetch_factor=2, drop_last=True,
+        prefetch_factor=2 if train_cfg.get("num_workers", 4) > 0 else None,
+        drop_last=True,
     )
     inf_loader = infinite_loader(loader)
     print(f"Dataset: {len(dataset)} images")
@@ -357,8 +358,8 @@ def main() -> None:
         with torch.no_grad():
             fake = refiner(input_img)
 
-        d_real = D(diff_augment(real,         augment_policy))
-        d_fake = D(diff_augment(fake.detach(), augment_policy))
+        d_real = D(diff_augment(real, augment_policy))
+        d_fake = D(diff_augment(fake, augment_policy))
         l_d    = F.softplus(-d_real).mean() + F.softplus(d_fake).mean()
 
         optD.zero_grad(set_to_none=True)

@@ -77,7 +77,7 @@ def _export(model: nn.Module, out_path: Path, opset: int = 17) -> None:
 
 def load_g256(path: Path, device: str = "cpu"):
     G256  = build_baseline_256_generator().to(device).eval()
-    state = torch.load(path, map_location=device, weights_only=True)
+    state = torch.load(path, map_location=device, weights_only=False)
     G256.load_state_dict(state["G_ema_state"])
     for p in G256.parameters(): p.requires_grad_(False)
     print(f"G_256: {sum(p.numel() for p in G256.parameters())/1e6:.2f}M")

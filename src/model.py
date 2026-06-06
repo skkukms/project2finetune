@@ -125,12 +125,10 @@ class ResBlockUp(nn.Module):
         self.skip = nn.Conv2d(in_ch, out_ch, kernel_size=1) if in_ch != out_ch else nn.Identity()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        h = F.interpolate(x, scale_factor=2.0, mode="nearest")
-        h = self.conv1(F.relu(self.norm1(h)))
+        x_up = F.interpolate(x, scale_factor=2.0, mode="nearest")
+        h = self.conv1(F.relu(self.norm1(x_up)))
         h = self.conv2(F.relu(self.norm2(h)))
-        skip = F.interpolate(x, scale_factor=2.0, mode="nearest")
-        skip = self.skip(skip)
-        return h + skip
+        return h + self.skip(x_up)
 
 
 class ResBlockDown(nn.Module):

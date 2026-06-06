@@ -52,11 +52,10 @@ class ResBlockUp(nn.Module):
         self.skip  = nn.Conv2d(in_ch, out_ch, 1) if in_ch != out_ch else nn.Identity()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        h    = F.interpolate(x, scale_factor=2.0, mode="nearest")
-        h    = self.conv1(F.relu(self.norm1(h)))
+        x_up = F.interpolate(x, scale_factor=2.0, mode="nearest")
+        h    = self.conv1(F.relu(self.norm1(x_up)))
         h    = self.conv2(F.relu(self.norm2(h)))
-        skip = self.skip(F.interpolate(x, scale_factor=2.0, mode="nearest"))
-        return (h + skip) / math.sqrt(2)
+        return (h + self.skip(x_up)) / math.sqrt(2)
 
 
 # ---------------------------------------------------------------------------
@@ -109,6 +108,7 @@ class Refiner512(nn.Module):
         self.to_rgb    = nn.Conv2d(ch, 3, 3, padding=1)
 
         nn.init.zeros_(self.to_rgb.weight)
+        nn.init.zeros_(self.to_rgb.bias)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         h        = self.res_post(self.up(self.res_pre(self.from_rgb(x))))
@@ -134,6 +134,7 @@ class Refiner1024(nn.Module):
         self.to_rgb    = nn.Conv2d(ch2, 3, 3, padding=1)
 
         nn.init.zeros_(self.to_rgb.weight)
+        nn.init.zeros_(self.to_rgb.bias)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         h        = self.res_post(self.up(self.res_pre(self.from_rgb(x))))
