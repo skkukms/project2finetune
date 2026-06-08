@@ -170,6 +170,9 @@ def main() -> None:
                 cuda=(device == "cuda"),
                 fid=True,
                 verbose=False,
+                cache=True,                       # cache real features across checkpoints
+                cache_root=str(tmp_path / "cache"),
+                input1_cache_name="real_valid",   # real features computed only once
             )
             fid = metrics["frechet_inception_distance"]
             print(f"  FID = {fid:.4f}")
